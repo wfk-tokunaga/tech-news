@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { Post, User, Vote } = require('../../models');
+const { Post, User, Vote, Comment } = require('../../models');
 const sequelize = require('../../config/connection');
 const { update } = require('../../models/User');
 
@@ -7,13 +7,23 @@ const { update } = require('../../models/User');
 router.get('/', (req, res) => {
     console.log(`====================`);
     Post.findAll({
-            attributes: [
-                'id', 'post_url', 'title', 'created_at', [sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']
-            ],
             order: [
                 ['created_at', 'DESC']
             ],
+            attributes: [
+                'id', 'post_url', 'title', 'created_at', [sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']
+            ],
             include: [{
+                model: Comment,
+                attributes: [
+                    'comment_text', 'user_id', 'post_id', 'created_at'
+                ],
+                // Nested include to replace user_id with username
+                include: {
+                    model: User,
+                    attributes: ['username']
+                }
+            }, {
                 model: User,
                 attributes: ['username']
             }],
@@ -37,9 +47,21 @@ router.get('/:id', (req, res) => {
                 'id', 'post_url', 'title', 'created_at', [sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'), 'vote_count']
             ],
             include: [{
-                model: User,
-                attributes: ['username']
-            }]
+                    model: Comment,
+                    attributes: [
+                        'comment_text', 'user_id', 'post_id', 'created_at'
+                    ],
+                    // Nested include to replace user_id with username
+                    include: {
+                        model: User,
+                        attributes: ['username']
+                    }
+                },
+                {
+                    model: User,
+                    attributes: ['username']
+                }
+            ]
         }).then(dbPostData => {
             if (!dbPostData) {
                 res.status(404).json({ message: "No post found with this id" });
@@ -53,6 +75,7 @@ router.get('/:id', (req, res) => {
         })
 });
 
+// Create a new post
 router.post('/', (req, res) => {
     console.log(`====================`);
     Post.create({
