@@ -4,7 +4,27 @@ const User = require('./User');
 // const bcrypt = require('bcrypt');
 
 class Post extends Model {
-
+    static upvote(body, models) {
+        return models.Vote.create({
+            user_id: body.user_id,
+            post_id: body.post_id
+        }).then(() => {
+            return Post.findOne({
+                where: {
+                    id: body.post_id
+                },
+                attributes: [
+                    'id',
+                    'post_url',
+                    'title',
+                    'created_at', [
+                        sequelize.literal('(SELECT COUNT(*) FROM vote WHERE post.id = vote.post_id)'),
+                        'vote_count'
+                    ]
+                ]
+            });
+        });
+    }
 }
 
 Post.init({
@@ -29,7 +49,6 @@ Post.init({
     },
     post_id: {
         type: DataTypes.INTEGER,
-        allowNull: false,
         references: {
             model: 'user',
             key: 'id'
@@ -42,7 +61,7 @@ Post.init({
     // Table config options here
     // Passing in sequelize connection
     sequelize,
-    timestamps: false,
+    // timestamps: true,
     freezeTableName: true,
     underscored: true,
     modelName: 'post'
