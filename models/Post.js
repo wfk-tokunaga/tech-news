@@ -1,7 +1,6 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../config/connection');
 const User = require('./User');
-// const bcrypt = require('bcrypt');
 
 class Post extends Model {
     static upvote(body, models) {
@@ -47,7 +46,7 @@ Post.init({
             isUrl: true
         }
     },
-    post_id: {
+    user_id: {
         type: DataTypes.INTEGER,
         references: {
             model: 'user',
