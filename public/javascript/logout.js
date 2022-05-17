@@ -9,8 +9,10 @@ async function logout() {
         // This line seems to work when I make it /login
         // But being directed to '/' is supposed to check if there's a session and if not, 
         // Direct you back to the login page
-        document.location.replace('/');
+        console.log('=====\nUSER HAS BEEN LOGGED OUT\n=====');
+        document.location.replace('/login');
     } else {
+        console.log('=====\nThere was an issue logging out\n=====');
         alert(response.statusText);
     }
 }

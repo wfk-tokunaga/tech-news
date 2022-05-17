@@ -44,11 +44,14 @@ router.get('/', (req, res) => {
 });
 
 router.get('/login', (req, res) => {
+    console.log('\n=====CHECKING IF LOGGED IN=====\n');
     if (req.session.loggedIn) {
+        console.log('\n=====USER IS LOGGED IN ALREADY=====\n');
         res.redirect('/');
         return;
     }
-
+    console.log('\n=====USER IS NOT LOGGED IN, RENDERING LOGIN PAGE=====\n');
     res.render('login');
-})
+});
+
 module.exports = router;
