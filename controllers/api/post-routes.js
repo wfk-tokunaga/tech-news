@@ -91,14 +91,17 @@ router.post('/', (req, res) => {
 });
 
 router.put('/upvote', (req, res) => {
-    Post.upvote(req.body, { Vote })
-        .then(updatedPostData => res.json(updatedPostData))
-        .catch(err => {
-            console.log(err);
-            res.status(400).json({ message: err });
-        })
-        // create the vote
-})
+    // make sure the session exists first
+    if (req.session) {
+        // pass session id along with all destructured properties on req.body
+        Post.upvote({...req.body, user_id: req.session.user_id }, { Vote, Comment, User })
+            .then(updatedVoteData => res.json(updatedVoteData))
+            .catch(err => {
+                console.log(err);
+                res.status(500).json(err);
+            });
+    }
+});
 
 // Update title of post with specific id
 router.put('/:id', (req, res) => {
